@@ -1,29 +1,28 @@
 # p4diff
-## A ```p4 diff``` and ```p4 diff2``` combo script
+#### A ```p4 diff``` and ```p4 diff2``` combo script
 
 I didn’t know if we had a bash script/tool to see the ```p4 diff``` and ```p4 diff2``` output in ```vimdiff```.
 I understand that ```p4 diff``` output can be viewed as a ```vimdiff``` if we set ```P4DIFF``` variable to ```vimdiff```.
 But ```p4 diff``` cannot be used to view diff of files not in your client.
 
-Hence I wrote a script, ```p4diff```, combining functionality of both p4 diff and p4 diff2 and opens the diff in vimdiff.
+Hence I wrote a script, ```p4diff```, combining functionality of both ```p4 diff``` and ```p4 diff2``` and opens the diff in ```vimdiff```.
 It supports the following usages(this does not cover all the usages but the main ones):
 
-1.  p4diff
++1.  `p4diff`
 
-Works as normal p4 diff. (Shows the diff of files opened in edit/add/…  modes in
-your workspace)
+&nbsp;&nbsp;&nbsp;&nbsp;Works as normal `p4 diff`. (Shows the diff of files opened in `edit/add/…`  modes in your workspace)
 
-2.  p4diff <filepath>
++2.  `p4diff <filepath>`
 
-    (a) If file at <filepath> is present in your workspace and client.
-        NOTE: <filepath> in this case can be relative or absolute.
+    -(a) If file at `<filepath>` is present in your workspace and client.
+&nbsp;&nbsp;&nbsp;&nbsp;NOTE: `<filepath>` in this case can be relative or absolute.
 
-            Works as p4 diff <filepath>#<latest_version_in_depot>
-            If your file <version in your workspace> is same as <latest version in depot>
-                Just says “file up-to-date”.
+            Works as `p4 diff <filepath>#<latest_version_in_depot>`
+            If your file `<version in your workspace>` is same as `<latest version in depot>`
+                Just says `“file(s) up-to-date”`.
                 Quit.
             else
-                Shows the vimdiff of your file <version in your workspace> version of the file
+                Shows the `vimdiff` of your file <version in your workspace> version of the file
                 with the <latest version in depot>
                 You can also edit in place your workspace version and save the changes to it.
                 Quit.
