@@ -1,0 +1,342 @@
+#!/bin/bash
+
+#
+# get the arguments
+#
+fileoldversion=$1
+filenewversion=$2
+
+#
+# check and print help
+#
+if [ "$fileoldversion" == "-h" ] || [ "$fileoldversion" == "--help" ]; then
+    echo ""
+    echo "Usage: "$0 "[filename1[#version]] [filename2[#version]]"
+    echo ""
+    exit
+fi
+
+#
+# save and set var P4DIFF=vimdiff for `p4 diff` to open diff in vimdiff
+#
+saveP4DIFF=$P4DIFF
+unset $P4DIFF
+export P4DIFF=vimdiff
+
+#
+# exit function, restore var P4DIFF and exit
+#
+function exit_func {
+    unset $P4DIFF
+    export P4DIFF=$saveP4DIFF
+    exit
+}
+
+#
+# If no arguments were proviede, just call `p4 diff` and exit
+#
+if [ -z "$fileoldversion" ]; then
+    p4 diff
+    exit_func
+fi
+
+#
+# extract first file name
+#
+oldfile=${fileoldversion%\#*}
+
+#
+# extract first file version
+#
+oldver=${fileoldversion##*\#}
+
+#
+# extract second file name
+#
+newfile=${filenewversion%\#*}
+
+#
+# extract second file version 
+#
+newver=${filenewversion##*\#}
+
+#
+# if first argument was improper, exit
+#
+if [ -z "$oldfile" ]; then
+    echo ""
+    echo "Error: "$fileoldversion" :Invalid file name"
+    echo ""
+    exit_func
+fi
+
+#
+# if first file version was not provided, reset it to empty
+#
+if [ "$oldver" == "$oldfile" ];then
+    oldver= 
+fi
+
+#
+# if second file version was not provided, reset it to empty
+#
+if [ "$newver" == "$newfile" ];then 
+    newver=
+fi
+
+#
+# function to check if a passed version is empty or less than 0, if so exit
+#
+function check_version {
+    local ver=$1
+    if [ ! -z "$ver" ] && [ "$ver" -le 0 ]; then
+        echo ""
+        echo "Error: Invalid version: less than or equal to 0"
+        echo ""
+        exit_func
+    fi
+}
+
+#
+# check first and second file versions
+#
+check_version $oldver
+check_version $newver
+
+#
+# function to compare 2 passed versions for the passed file
+#
+function compare_versions {
+    local file=$1
+    local ver1=$2
+    local ver2=$3
+    if [ "$ver1" -gt "$ver2" ]; then
+        echo ""
+        echo "Error: "$file"#"$ver1" :version greater than latest: "$ver2
+        echo ""
+        exit_func
+    fi
+}
+
+#
+# variable for holding current version of file in workspace
+#
+havever=
+
+#
+# function to get the current version of file in workspace
+#
+function get_havever {
+    havever=
+    local file=$1
+    havefileverinfo=$(p4 have "$file" 2> /dev/null)
+    havefilever=${havefileverinfo%% *}
+    havever=${havefilever##*\#}
+}
+
+#
+# function to print error and exit (called if file does not exist in depot)
+#
+function no_depot_file {
+    local file=$1
+    echo ""
+    echo "Error: "$file:" No such file in depo"
+    echo ""
+    exit_func
+}
+
+#
+# get the latest version info of first file in depot
+#
+latestoldverinfo=$(p4 fstat -T headRev $oldfile 2> /dev/null) 
+
+#
+# get latest version of first file in depot
+#
+latestoldver=${latestoldverinfo##* }
+
+#
+# print error and exit if first file does not exist in depot
+# otherwise, if no version was provided for first file, make it equal to 
+# latest version of first file in depot
+#
+if [ -z "$latestoldver" ]; then
+    no_depot_file $oldfile
+elif [ -z "$oldver" ]; then
+     oldver=$latestoldver
+fi
+
+#
+# make sure that version provided for the first file is less than the latest
+# version of the first file in depot
+#
+compare_versions $oldfile $oldver $latestoldver
+
+#
+# function that invokes `p4 diff` for passed file and its passed version,
+# this function gets the diff of file@version with the version of file in 
+# workspace and exits
+#
+function p4_diff {
+    local file=$1
+    local ver=$2
+    p4 diff $file"#"$ver
+    exit_func
+}
+
+#
+# the latest version info of second file in depot
+#
+latestnewverinfo=
+
+#
+# latest version of second file in depot
+#
+latestnewver=
+
+#
+# get the current version of first file in workspace
+#
+get_havever $oldfile
+
+#
+# if second file/argument was provided in commandd line
+#
+if [ ! -z "$newfile" ]; then
+    #
+    # get the latest version info of second file in depot
+    #
+    latestnewverinfo=$(p4 fstat -T headRev $newfile 2> /dev/null) 
+
+    #
+    # get the latest version of second file in depot
+    #
+    latestnewver=${latestnewverinfo##* }
+    
+    #
+    # print error and exit if second file does not exist in depot
+    #
+    if [ -z "$latestnewver" ]; then
+        no_depot_file $newfile
+    fi
+
+    #
+    # if first and second files are same and no version was provided for 
+    # second file
+    #
+    if [ "$oldfile" == "$newfile" ] && [ -z "$newver" ]; then
+        #
+        # and if file exists in workspace, then just invoke 
+        # `p4 diff file#<first_file_version>`
+        #
+        if [ ! -z "$havever" ]; then
+            p4_diff $oldfile $oldver
+        fi
+    #
+    # if first and second files are same and version was provided for 
+    # second file
+    #
+    elif [ "$oldfile" == "$newfile" ] && [ ! -z "$newver" ]; then
+        #
+        # and if file exists in workspace, and the second version provided is 
+        # same as current version of second file in workspace
+        # then just invoke `p4 diff file#<first_file_version>`
+        #
+        if [ ! -z "$havever" ] && [ "$newver" == "$havever" ]; then
+            p4_diff $oldfile $oldver
+        fi
+    fi
+
+    # 
+    # now, if second file version is empty set second file version to 
+    # latest second file version in depot
+    # 
+    if [ -z "$newver" ]; then
+         newver=$latestnewver
+    fi
+else
+    #
+    # if second file/argument was not provided in command line
+    # and if file is availabe in workspace, invoke  
+    # `p4 diff file#<first_file_version>
+    #
+    if [ ! -z "$havever" ]; then
+        p4_diff $oldfile $oldver
+    else
+        #
+        # and if file is not-availabe in workspace update some global vars, like
+        # make second file same as first file name
+        # make second file version same as latest version of second file in depot
+        # make second file latest version in depot and version of second file 
+        # in depot same
+        #
+        newfile=$oldfile
+        newver=$latestoldver
+        latestnewver=$newver
+    fi
+fi
+
+#
+# p4 diff2 section
+#
+
+#
+# p4 diff2  function
+#
+function func_diff {
+    #
+    # extract base name from first and second file names
+    #
+    oldfilebase=$(basename "$oldfile")
+    newfilebase=$(basename "$newfile")
+
+    # 
+    # make tmp files for first and secondf files
+    #
+    fileoldtmp=/var/tmp/$oldfilebase"#"$oldver"_tmp"
+    filenewtmp=/var/tmp/$newfilebase"#"$newver"_tmp"
+
+    #
+    # copy the correct versions of first and second files into corresponding  
+    # tmp files
+    p4 print $oldfile"#"$oldver > $fileoldtmp
+    p4 print $newfile"#"$newver > $filenewtmp
+
+    #
+    # take the vimdiff of first and second tmp files
+    #
+    vimdiff $fileoldtmp $filenewtmp
+
+    #
+    # remove first and second temp files
+    #
+    rm -rf $fileoldtmp $filenewtmp
+    
+    #
+    # done and exit
+    #
+    exit_func
+}
+
+#
+# make sure that version of the second file is less than the latest
+# version of the second file in depot
+#
+compare_versions $newfile $newver $latestnewver
+
+#
+# check if the first and second files same and if their versions are the same,
+# if so nothing to do
+#
+if [ "$oldfile" == "$newfile" ] && [ "$oldver" == "$newver" ]; then
+    echo ""
+    echo "No diff! Same versions of the same file!"
+    echo ""
+    exit_func
+fi
+
+#
+# invoke `p4 diff2 file1#version1 file2#version2
+func_diff
+
+# end 
