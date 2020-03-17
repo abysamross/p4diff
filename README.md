@@ -16,23 +16,33 @@ It supports the following usages(this does not cover all the usages but the main
 2.  `p4diff <filepath>`
 
     a. If file at `<filepath>` is present in your workspace and client.
+
 &nbsp;&nbsp;&nbsp;&nbsp;NOTE: `<filepath>` in this case can be relative or absolute.
 
 &nbsp;&nbsp;&nbsp;&nbsp;Works as `p4 diff <filepath>#<latest_version_in_depot>`
+
 &nbsp;&nbsp;&nbsp;&nbsp;If your file `<version in your workspace>` is same as `<latest version in depot>`
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Just says `“file(s) up-to-date”`.
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Quit.
+
 &nbsp;&nbsp;&nbsp;&nbsp;else
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Shows the `vimdiff` of your file `<version in your workspace>` version of the file with the `<latest version in depot>`
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;You can also edit in place your workspace version and save the changes to it.
+
 &nbsp;&nbsp;&nbsp;&nbsp;Quit.
 
     b. If file at `<filepath>` is not present in your workspace as per your client.
+
 &nbsp;&nbsp;&nbsp;&nbsp;NOTE: `<filepath>` in this case has to be your absolute depot path.
 
 &nbsp;&nbsp;&nbsp;&nbsp;Works as `p4 diff2 <filepath>#<latest_version_in_depot> <filepath>#<latest_version_in_depot>`
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Just says `“No diff! Same versions of the same file”`
+
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Quit.
 
 3.  p4diff <filepath>#<version>
