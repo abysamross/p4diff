@@ -36,7 +36,7 @@ It supports the following usages(this does not cover all the usages but the main
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Quit.
 
-    b. If file at `<filepath>` is not present in your workspace as per your client.
+&nbsp;&nbsp;&nbsp;&nbsp;b. If file at `<filepath>` is not present in your workspace as per your client.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NOTE: `<filepath>` in this case has to be your absolute depot path.
 
