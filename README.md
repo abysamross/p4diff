@@ -1,7 +1,7 @@
 &nbsp;&nbsp;&nbsp;&nbsp;           
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 # p4diff
-#### A ```p4 diff``` and ```p4 diff2``` combo script
+### A ```p4 diff``` and ```p4 diff2``` combo script
 
 I didn’t know if we had a bash script/tool to see the ```p4 diff``` and ```p4 diff2``` output in ```vimdiff```.
 I understand that ```p4 diff``` output can be viewed as a ```vimdiff``` if we set ```P4DIFF``` variable to ```vimdiff```.
@@ -36,7 +36,7 @@ It supports the following usages(this does not cover all the usages but the main
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Quit.
 
-&nbsp;&nbsp;&nbsp;&nbsp;b. If file at `<filepath>` is not present in your workspace as per your client.
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;b. If file at `<filepath>` is not present in your workspace as per your client.
 
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;NOTE: `<filepath>` in this case has to be your absolute depot path.
 
